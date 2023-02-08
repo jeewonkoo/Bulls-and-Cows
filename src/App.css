@@ -13,4 +13,20 @@
   width: 40px;
   height: 40px;
   border: 1px solid black;
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+}
+
+.correct {
+  background-color: green;
+}
+
+.close {
+  background-color: yellow;
+}
+
+.incorrect {
+  background-color: lightgray;
 }
