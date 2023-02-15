@@ -6,99 +6,98 @@ const TILE_LENGTH = 4;
 function App() {
   
   const [solution, setSolution] = useState('');
-  const [guesses, setGuesses] = useState(Array(6).fill(null));
   const [currentGuess, setCurrentGuess] = useState('');
   const [gameover, setGameOver] = useState(false);
+  const [out, setOut] = useState(true);
+  const [strike, setStrike] = useState(0);
+  const [ball, setBall] = useState(0);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [result, setResult] = useState([""]);
+  const [guesses, setGuesses] = useState([]);
 
   useEffect(() => {
-    const handleType = (event) => {
-      if (gameover) return;
-      if (event.key === 'Enter') {
-        if (currentGuess.length !== 4) return;
+  }, [ball, strike]);
 
-        const newGuesses = [...guesses];
-        newGuesses[guesses.findIndex(val => val == null)] = currentGuess;
-        setGuesses(newGuesses);
-        setCurrentGuess('');
-
-        const isCorrect = solution === currentGuess;
-        if (isCorrect) setGameOver(true);
-      } else if (event.key === 'Backspace') { 
-        setCurrentGuess(currentGuess.slice(0, -1));
-        return;
-      }
-
-      if (currentGuess.length >= 4) return;
-
-      setCurrentGuess(oldGuess => oldGuess + event.key);
-    };
-
-    window.addEventListener("keydown", handleType);
-    return () => window.removeEventListener('keydown', handleType);
-  }, [currentGuess, gameover]);
 
   const generateSolution = () => {
     const random = Math.floor(Math.random() * 9000 + 1000);
     setSolution(random);
-    console.log(solution);
   };
 
-  
+  const handleGuess = () => {
+    var solutionArray = String(solution).split("").map((num)=>{
+      return Number(num)
+    })
+    var guessArray = String(currentGuess).split("").map((num)=>{
+      return Number(num)
+    })
+    var strikeCount = 0;
+    var ballCount = 0;
+    for (var i=0; i<4; i++) {
+      if (solutionArray[i] === guessArray[i]) {
+        strikeCount++;
+      } else if (solutionArray.includes(guessArray[i])) {
+        ballCount++;
+      }
+    }
+    setBall(ballCount);
+    setStrike(strikeCount);
+    console.log(ball, strike);
+    if (ball === 0 && strike === 0) setOut(true);
+  }
+
+  const displayGuesses = () => {
+    // NEED TO FIX
+    // guesses.push(currentGuess);
+    return (
+      <div>
+        {guesses}
+      </div>
+    )
+  }
+
+  const displayResults = () => {
+    return (
+      <div>
+        <div>BALL {ball} {"\n"}</div>
+        <div>STRIKE {strike} {"\n"}</div>
+      </div>
+    )
+  }
 
   return (
     <div>
-      <h1>BULLS && COWS</h1>
-      {solution}
+      <h1>&&</h1>
       <button
         onClick={()=>generateSolution()}
         >
         GAME START
       </button>
-      <div className='board'>
-        {
-          guesses.map((guess, idx) => {
-            const isCurrentGuess = idx === guesses.findIndex(val => val == null)
-            return (
-              <Line 
-              guess={isCurrentGuess ? currentGuess : guess ?? ''}
-              isFinal={!isCurrentGuess && guess != null}
-              solution={solution}
-              />
-            );
-          })
-        }
+      <div>
+        {solution}
+      </div>
+      <div>
+        <input
+          type={currentGuess}
+          onChange={(e) => setCurrentGuess(e.target.value)}
+        />
+      </div>
+      <button
+        onClick={() => handleGuess()}
+        >
+        SUBMIT
+      </button>
+      <div>
+        {currentGuess}
+      </div>
+      <div>
+        {displayGuesses()}
+        {displayResults()}
       </div>
     </div>
   );
 }
 
-function Line({guess, isFinal, solution}) {
-  const tiles = [];
-  for (let i=0; i<TILE_LENGTH; i++) {
-    let className = "tile";
-    const num = guess[i];
-    if (isFinal) {
-      if (num === solution[i]) {
-        className += " correct";
-      } else if (solution.includes(num)) {
-        className += " close";
-      } else {
-        className += " incorrect";
-      }
-    }
-
-    tiles.push(
-      <div key={i} className={className}>
-        {num}
-      </div>
-    );
-  }
-  return (
-    <div className='line'>
-      {tiles}
-    </div>
-  )
-}
 
 
 export default App;
